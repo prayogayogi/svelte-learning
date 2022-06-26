@@ -1,11 +1,17 @@
 <script>
+  import { FeedbackStore } from "../stores";
+  import { v4 as uuidv4 } from "uuid";
   import Button from "./Button.svelte";
   import Card from "./Card.svelte";
+  import RantingSelect from "./RatingSelect.svelte";
 
   let text = "";
+  let rating = 10;
   let btnDisable = true;
   let min = 10;
   let message;
+
+  const handleSelect = (e) => (rating = e.detail);
 
   const handleInput = () => {
     if (text.trim().length <= min) {
@@ -15,13 +21,30 @@
       btnDisable = false;
     }
   };
+
+  const handleSubmit = () => {
+    if (text.trim().length > min) {
+      const newFeedback = {
+        id: uuidv4(),
+        text,
+        rating: +rating,
+      };
+
+      FeedbackStore.update((currentFeedback) => {
+        return [newFeedback, ...currentFeedback];
+      });
+
+      text = "";
+    }
+  };
 </script>
 
 <Card>
   <header>
     <h2>How Would you rate your service with us.?</h2>
   </header>
-  <form>
+  <RantingSelect on:rating-select={handleSelect} />
+  <form on:submit|preventDefault={handleSubmit}>
     <div class="input-group">
       <input
         type="text"
